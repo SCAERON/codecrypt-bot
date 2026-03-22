@@ -125,7 +125,7 @@ async def cmd_start(message: types.Message):
         except:
             pass
 
-        user = await get_user(message.from_user.id)
+    user = await get_user(message.from_user.id)
     if not user:
         try:
             await create_user(message.from_user.id, message.from_user.username, referred_by)
