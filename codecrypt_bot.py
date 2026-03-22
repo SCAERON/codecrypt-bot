@@ -125,14 +125,18 @@ async def cmd_start(message: types.Message):
         except:
             pass
 
-    user = await get_user(message.from_user.id)
+        user = await get_user(message.from_user.id)
     if not user:
-        await create_user(message.from_user.id, message.from_user.username, referred_by)
+        try:
+            await create_user(message.from_user.id, message.from_user.username, referred_by)
+        except asyncpg.exceptions.UniqueViolationError:
+            # User was inserted by another request; just continue
+            pass
         await message.answer(
             f"🎧 Welcome to **CODECRYPT Shop**!\n\n"
             f"Use /buy to see products.\n\n"
             f"🌟 Invite friends with your referral link:\n"
-            f"`https://t.me/{bot.username}?start=ref_{message.from_user.id}`\n"
+            f"`https://t.me/CodeCryptAssistantBot_bot?start=ref_{message.from_user.id}`\n"
             f"You earn **30% commission** on their purchases!"
         )
     else:
