@@ -3,7 +3,8 @@
 CODECRYPT Shop Bot – Supabase (PostgreSQL) Version
 Permanent database – no more data loss.
 """
-
+import aiohttp
+from aiohttp import web
 import asyncio
 import logging
 import os
@@ -314,9 +315,26 @@ async def cmd_stats(message: types.Message):
     )
 
 # ---------- Run ----------
+async def start_web_server():
+    app = web.Application()
+    async def health(request):
+        return web.Response(text="OK")
+    app.router.add_get("/", health)
+    runner = web.AppRunner(app)
+    await runner.setup()
+    port = int(os.getenv("PORT", 8080))
+    site = web.TCPSite(runner, "0.0.0.0", port)
+    await site.start()
+    print(f"Web server running on port {port}")
+    # Keep the server running forever
+    await asyncio.Event().wait()
+
 async def main():
-    await init_db()
-    await dp.start_polling(bot)
+    # Start both the bot polling and the web server at the same time
+    await asyncio.gather(
+        dp.start_polling(bot),
+        start_web_server()
+    )
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
