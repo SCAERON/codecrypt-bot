@@ -313,7 +313,27 @@ async def cmd_stats(message: types.Message):
         f"Total sales: {total_sales} Stars\n"
         f"Affiliate sales: {affiliate_sales} Stars"
     )
-
+@dp.message(Command("help"))
+async def cmd_help(message: types.Message):
+    await message.answer(
+        "🤖 **CodeCrypt Bot – How to Use**\n\n"
+        "📌 **Commands:**\n"
+        "`/start` – Register and get your referral link\n"
+        "`/buy` – See available products\n"
+        "`/pay <id>` – Buy a product (e.g., `/pay 1`)\n"
+        "`/affiliate` – View your referral link and balance\n"
+        "`/balance` – Check your Stars balance\n"
+        "`/withdraw` – Request payout of your balance\n\n"
+        "🛒 **How to Buy:**\n"
+        "1. Send `/buy` to see products\n"
+        "2. Pick a product ID (e.g., `1`)\n"
+        "3. Send `/pay 1` to purchase\n"
+        "4. Pay with Telegram Stars\n"
+        "5. Download link will be sent immediately\n\n"
+        "💸 **Affiliate Program:**\n"
+        "Share your referral link from `/affiliate`. When someone buys using your link, you earn 30% commission in Stars.\n\n"
+        "Need more help? DM @CodeCryptOfficial"
+    )
 # ---------- Run ----------
 async def start_web_server():
     app = web.Application()
@@ -328,7 +348,37 @@ async def start_web_server():
     print(f"Web server running on port {port}")
     # Keep the server running forever
     await asyncio.Event().wait()
-
+@dp.message()
+async def handle_text(message: types.Message):
+    text = message.text.lower().strip()
+    
+    if text in ["start", "help", "buy", "affiliate", "balance"]:
+        if text == "start":
+            await cmd_start(message)
+        elif text == "help":
+            await cmd_help(message)
+        elif text == "buy":
+            await cmd_buy(message)
+        elif text == "affiliate":
+            await cmd_affiliate(message)
+        elif text == "balance":
+            await cmd_balance(message)
+    elif text.startswith("pay") and len(text.split()) == 2:
+        # Example: "pay 1"
+        parts = text.split()
+        product_id = parts[1]
+        # Create a fake command message to reuse cmd_pay logic
+        class FakeMessage:
+            def __init__(self, original, text):
+                self.from_user = original.from_user
+                self.chat = original.chat
+                self.text = f"/pay {product_id}"
+        fake_msg = FakeMessage(message, f"/pay {product_id}")
+        await cmd_pay(fake_msg)
+    else:
+        await message.answer(
+            "❓ I didn't understand that. Type `/help` to see available commands."
+        )
 async def main():
     # Start both the bot polling and the web server at the same time
     await asyncio.gather(
