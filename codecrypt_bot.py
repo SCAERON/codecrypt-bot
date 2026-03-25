@@ -135,10 +135,17 @@ async def cmd_start(message: types.Message):
             pass
         await message.answer(
             f"🎧 Welcome to **CODECRYPT Shop**!\n\n"
-            f"Use /buy to see products.\n\n"
-            f"🌟 Invite friends with your referral link:\n"
+            f"**Commands:**\n"
+            f"/start – Register & get your referral link\n"
+            f"/buy – See available products\n"
+            f"/pay <id> – Buy a product (e.g., /pay 1)\n"
+            f"/affiliate – Your referral link and balance\n"
+            f"/balance – Check your Stars balance\n"
+            f"/withdraw – Request payout\n\n"
+            f"🌟 **Your referral link:**\n"
             f"`https://t.me/CodeCryptAssistantBot_bot?start=ref_{message.from_user.id}`\n"
-            f"You earn **30% commission** on their purchases!"
+            f"Share it – you earn **30% commission** on every sale!\n\n"
+            f"Type `/help` anytime to see this again."
         )
     else:
         await message.answer(
@@ -379,24 +386,6 @@ async def handle_text(message: types.Message):
         await message.answer(
             "❓ I didn't understand that. Type `/help` to see available commands."
         )
-@dp.message()
-async def handle_plain_pay(message: types.Message):
-    text = message.text.lower().strip()
-    # Check if message looks like "pay 1", "pay 2", etc.
-    if text.startswith("pay") and len(text.split()) == 2:
-        parts = text.split()
-        product_id = parts[1]
-        # Create a fake command so we can reuse the existing cmd_pay logic
-        class FakeMessage:
-            def __init__(self, original, text):
-                self.from_user = original.from_user
-                self.chat = original.chat
-                self.text = text
-        fake = FakeMessage(message, f"/pay {product_id}")
-        await cmd_pay(fake)
-    else:
-        # If not a pay command, we can either ignore or give a hint
-        pass
 async def main():
     # Start both the bot polling and the web server at the same time
     await asyncio.gather(
