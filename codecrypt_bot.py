@@ -149,8 +149,18 @@ async def cmd_start(message: types.Message):
         )
     else:
         await message.answer(
-            f"Welcome back! Use /buy to shop.\n"
-            f"Your balance: {await get_balance(message.from_user.id)} Stars"
+            f"🎧 Welcome to **CODECRYPT Shop**!\n\n"
+            f"**Commands:**\n"
+            f"/start – Register & get your referral link\n"
+            f"/buy – See available products\n"
+            f"/pay <id> – Buy a product (e.g., /pay 1)\n"
+            f"/affiliate – Your referral link and balance\n"
+            f"/balance – Check your Stars balance\n"
+            f"/withdraw – Request payout\n\n"
+            f"🌟 **Your referral link:**\n"
+            f"`https://t.me/CodeCryptAssistantBot_bot?start=ref_{message.from_user.id}`\n"
+            f"Share it – you earn **30% commission** on every sale!\n\n"
+            f"Type `/help` anytime to see this again."
         )
 
 @dp.message(Command("buy"))
