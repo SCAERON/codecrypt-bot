@@ -301,7 +301,49 @@ async def cmd_add_product(message: types.Message):
     await conn.execute("INSERT INTO products (name, price, file_link) VALUES ($1, $2, $3)", name, price, file_link)
     await conn.close()
     await message.answer(f"Product '{name}' added with price {price} Stars.")
-
+@dp.message(Command("pending_withdrawals"))
+async def cmd_pending_withdrawals(message: types.Message):
+    # Only the admin can use this
+    if message.from_user.id != ADMIN_ID:
+        return
+    conn = await asyncpg.connect(DATABASE_URL)
+    rows = await conn.fetch("SELECT id, user_id, amount, requested_at FROM withdrawals WHERE status = 'pending' ORDER BY requested_at")
+    await conn.close()
+    if not rows:
+        await message.answer("📭 No pending withdrawals.")
+        return
+    text = "📋 **Pending Withdrawals:**\n\n"
+    for row in rows:
+        text += f"`ID: {row['id']}` | User: `{row['user_id']}` | Amount: `{row['amount']}` Stars\nRequested: {row['requested_at'].strftime('%Y-%m-%d %H:%M')}\n\n"
+    await message.answer(text)
+@dp.message(Command("process_withdrawal"))
+async def cmd_process_withdrawal(message: types.Message):
+    if message.from_user.id != ADMIN_ID:
+        return
+    args = message.text.split()
+    if len(args) < 2:
+        await message.answer("Usage: `/process_withdrawal <withdrawal_id>`")
+        return
+    try:
+        w_id = int(args[1])
+    except:
+        await message.answer("Invalid ID. Please provide a number.")
+        return
+    conn = await asyncpg.connect(DATABASE_URL)
+    # Check if withdrawal exists and is pending
+    row = await conn.fetchrow("SELECT user_id, amount, status FROM withdrawals WHERE id = $1", w_id)
+    if not row:
+        await conn.close()
+        await message.answer("❌ Withdrawal not found.")
+        return
+    if row['status'] != 'pending':
+        await conn.close()
+        await message.answer(f"⚠️ This withdrawal is already {row['status']}.")
+        return
+    # Update status to 'processed'
+    await conn.execute("UPDATE withdrawals SET status = 'processed', processed_at = $1 WHERE id = $2", datetime.now(), w_id)
+    await conn.close()
+    await message.answer(f"✅ Withdrawal ID `{w_id}` marked as **processed**.\nUser {row['user_id']} received {row['amount']} Stars.\n*(You must have sent the Stars manually outside the bot.)*")
 @dp.message(Command("list_products"))
 async def cmd_list_products(message: types.Message):
     if message.from_user.id != ADMIN_ID:
