@@ -156,10 +156,7 @@ async def cmd_start(message: types.Message):
             f"/pay <id> – Buy a product (e.g., /pay 1)\n"
             f"/affiliate – Your referral link and balance\n"
             f"/balance – Check your Stars balance\n"
-            f"/withdraw – Request payout\n\n"
-            f"🌟 **Your referral link:**\n"
-            f"`https://t.me/CodeCryptAssistantBot_bot?start=ref_{message.from_user.id}`\n"
-            f"Share it – you earn **30% commission** on every sale!\n\n"
+            
             f"Type `/help` anytime to see this again."
         )
 
